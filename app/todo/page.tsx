@@ -1,11 +1,14 @@
 'use client'
-import { useState, useEffect} from "react"
+import { useState, useEffect, ChangeEvent} from "react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { todoLoader, deleteAction } from '@/app/todo/actions'
-import { useRouter } from "next/navigation";
+import { readAction, deleteAction, createAction } from '@/app/todo/actions'
+import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogHeader, DialogFooter } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { toDoItemsType } from "@/types"
 
 const tableHeaderNames=[
     "Task Number",
@@ -17,29 +20,39 @@ const tableHeaderNames=[
 
 export default function ToDO(){
     //fetching data 
-    const [toDoItems, setToDoItems] = useState<any>([]);
-    const router = useRouter()
+    const [toDoItems, setToDoItems] = useState<toDoItemsType[]>([]);
+    const [triggerRefresh, setTriggerRefresh]= useState<boolean>(false)
+    const [id, setId]=useState<number>(0)
+    const [name, setName]=useState<string>("")
+    const [priority, setPriority]=useState<number>(0)
+    const [done, setDone]=useState<boolean>(false)
+
     useEffect(() => {
         async function fetchData() {
             try {
-                const loadedToDoItems = await todoLoader();
+                const loadedToDoItems = await readAction();
                 setToDoItems(loadedToDoItems);
             } catch (error) {
                 console.error('Failed to load todo items:', error);
             }
         }
         fetchData();
-    }, [toDoItems]);
+    }, [triggerRefresh]);
 
     //delete
-    const handleDelete = async (id:any) => {
-        try {
-            await deleteAction({id});
-            router.refresh()
-        } catch (error) {
-            console.error('Error deleting todo item:', error);
-        }
+    const handleDelete = async (id:number) => {
+        await deleteAction({id});
+        setTriggerRefresh(prev => !prev)
     };
+
+    //insert
+    const handleInsert = async ()=>{
+        const newItem = {id:toDoItems.length+1,name, priority, done}
+        await createAction(newItem)
+        setTriggerRefresh(prev=>!prev)
+        setName("")
+        setPriority(0)
+    }
 
     if (toDoItems !== null){
         return (
@@ -54,9 +67,9 @@ export default function ToDO(){
                     </TableRow>
                     </TableHeader>
                     <TableBody>
-                    {toDoItems && toDoItems.length > 0 ? toDoItems.map((todoItem:any)=>(
+                    {toDoItems && toDoItems.length > 0 ? toDoItems.map((todoItem, index)=>(
                         <TableRow key={todoItem.id}>
-                            <TableCell>{todoItem.id}</TableCell>
+                            <TableCell>{index+1}</TableCell>
                             <TableCell className="text-center">{todoItem.name}</TableCell>
                             <TableCell>
                                 {
@@ -80,6 +93,32 @@ export default function ToDO(){
                     )}
                     </TableBody>
                 </Table>
+                {/* create a task */}
+                <Dialog>
+                    <DialogTrigger asChild>
+                    <div className="flex justify-center mt-5">
+                        <Button className=" bg-[#201f1f] text-white px-10">Create a new Task</Button>
+                    </div>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Create a Task</DialogTitle>
+                        </DialogHeader>
+                        <div className="mt-5">
+                            <form onSubmit={handleInsert} method="post" className="grid gap-5">
+                                <Input placeholder="name" type="string" value={name} onChange={(e)=>{setName(e.target.value)}}/>
+                                <Input placeholder="priority" type="number" value={priority} onChange={(e)=>{setPriority(parseInt(e.target.value))}}/>
+                                {/* <div className="flex gap-5 pl-1 text-gray-700">
+                                    <Label>Done</Label>
+                                    <Checkbox checked={true} value={done} onChange={(e:React.FormEvent<HTMLButtonElement>)=>{setToDoItems({...toDoItems, done:e.target.checked})}}/>
+                                </div> */}
+                                <DialogFooter>
+                                    <Button className=" bg-[#201f1f] text-white px-8" type="submit">Save changes</Button>
+                                </DialogFooter>
+                            </form>
+                        </div>
+                    </DialogContent>
+                </Dialog>
             </div>  
         )
     }
