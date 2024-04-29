@@ -23,3 +23,9 @@ export async function  createAction({name, priority, done}:toDoItemsType){
     if(error){throw new Error("Did not create row")}
 }
 
+//update
+export async function updateAction({id, name, priority, done}:toDoItemsType){
+    const {error} = await supabase.from('todo').update({name, priority, done}).eq('id',id)
+    if(error){throw new Error("Did not update row")}
+}
+

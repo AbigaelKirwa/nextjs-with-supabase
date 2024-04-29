@@ -4,7 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { readAction, deleteAction, createAction } from '@/app/todo/actions'
+import { readAction, deleteAction, createAction, updateAction } from '@/app/todo/actions'
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogHeader, DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -26,6 +26,7 @@ export default function ToDO(){
     const [name, setName]=useState<string>("")
     const [priority, setPriority]=useState<number>(0)
     const [done, setDone]=useState<boolean>(false)
+    const [updateTask, setUpdateTask]=useState<toDoItemsType | null>(null)
 
     useEffect(() => {
         async function fetchData() {
@@ -47,11 +48,22 @@ export default function ToDO(){
 
     //insert
     const handleInsert = async ()=>{
-        const newItem = {id:toDoItems.length+1,name, priority, done}
+        const newItem = {id, name, priority, done}
         await createAction(newItem)
         setTriggerRefresh(prev=>!prev)
         setName("")
         setPriority(0)
+    }
+
+    //update
+    const handleUpdate = async (id:number)=>{
+        if(updateTask && updateTask.name !==name || updateTask?.priority !==priority || updateTask.done !==done){
+            const updatedItem = {id, name, priority, done}
+            await updateAction(updatedItem)
+            setTriggerRefresh(prev=>!prev)
+            setName('')
+            setPriority(0)
+        }
     }
 
     if (toDoItems !== null){
@@ -82,8 +94,39 @@ export default function ToDO(){
                                 {todoItem.done === true ? <Checkbox checked={todoItem.done} className="border-gray-600"/> : <Checkbox className="border-gray-600"/>}
                             </TableCell>
                             <TableCell>
-                                <Button variant="secondary" className=" bg-blue-700 text-white">Edit</Button>
-                                <Button variant="destructive" className="ml-5 bg-[#C30010] text-white" onClick={()=>handleDelete(todoItem.id)}>Delete</Button>
+                                 {/* update a task */}
+                                 <div className="flex flex-row items-center justify-center">
+                                    <div>
+                                        <Dialog>
+                                            <DialogTrigger asChild>
+                                            <div>
+                                                <Button variant="secondary" className=" bg-blue-700 text-white" onClick={()=>{setUpdateTask(todoItem)}}>Edit</Button>
+                                            </div>
+                                            </DialogTrigger>
+                                            <DialogContent>
+                                                <DialogHeader>
+                                                    <DialogTitle>Update a Task</DialogTitle>
+                                                </DialogHeader>
+                                                <div className="mt-5">
+                                                    <form onSubmit={()=>handleUpdate(todoItem.id)} method="post" className="grid gap-5">
+                                                        <Input placeholder={todoItem.name} type="string" value={name} onChange={(e)=>{setName(e.target.value)}}/>
+                                                        <Input placeholder="priority" type="number" value={priority} onChange={(e)=>{setPriority(parseInt(e.target.value))}}/>
+                                                        <div className="flex gap-5 pl-1 text-gray-700">
+                                                            <Label>Done</Label>
+                                                            {todoItem.done===true ? <input type="checkbox" defaultChecked onChange={()=>setDone(false)}/> : <input type="checkbox" onChange={()=>setDone(true)}/>}
+                                                        </div>
+                                                        <DialogFooter>
+                                                            <Button className=" bg-[#201f1f] text-white px-8" type="submit">Save changes</Button>
+                                                        </DialogFooter>
+                                                    </form>
+                                                </div>
+                                            </DialogContent>
+                                        </Dialog>
+                                    </div>
+                                    <div>
+                                    <Button variant="destructive" className="ml-5 bg-[#C30010] text-white" onClick={()=>handleDelete(todoItem.id)}>Delete</Button>
+                                    </div>
+                                 </div>
                             </TableCell>
                         </TableRow>
                     )) : (
@@ -108,10 +151,6 @@ export default function ToDO(){
                             <form onSubmit={handleInsert} method="post" className="grid gap-5">
                                 <Input placeholder="name" type="string" value={name} onChange={(e)=>{setName(e.target.value)}}/>
                                 <Input placeholder="priority" type="number" value={priority} onChange={(e)=>{setPriority(parseInt(e.target.value))}}/>
-                                {/* <div className="flex gap-5 pl-1 text-gray-700">
-                                    <Label>Done</Label>
-                                    <Checkbox checked={true} value={done} onChange={(e:React.FormEvent<HTMLButtonElement>)=>{setToDoItems({...toDoItems, done:e.target.checked})}}/>
-                                </div> */}
                                 <DialogFooter>
                                     <Button className=" bg-[#201f1f] text-white px-8" type="submit">Save changes</Button>
                                 </DialogFooter>
