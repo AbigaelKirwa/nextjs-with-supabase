@@ -20,7 +20,6 @@ interface ReactToDoProps{
     handleDelete: (id: number) => void;
     updateTask: (toDoItemsType|null)
 }
-
 export default function ReadToDo({toDoItems, tableHeaderNames, name, priority, setName, setPriority, setUpdateTask, handleUpdate, setDone, handleDelete, updateTask}:ReactToDoProps) {
   return (
     <Table className="mt-10">
@@ -53,7 +52,13 @@ export default function ReadToDo({toDoItems, tableHeaderNames, name, priority, s
                             <Dialog>
                                 <DialogTrigger asChild>
                                 <div>
-                                    <Button variant="secondary" className=" bg-blue-700 text-white" onClick={()=>{setUpdateTask(todoItem)}}>Edit</Button>
+                                    <Button variant="secondary" className=" bg-blue-700 text-white" onClick={()=>{
+                                        setUpdateTask(todoItem)
+                                        setName(todoItem.name)
+                                        setDone(todoItem.done)
+                                        setPriority(todoItem.priority)
+                                        }}>
+                                            Edit</Button>
                                 </div>
                                 </DialogTrigger>
                                 <DialogContent>
@@ -61,7 +66,7 @@ export default function ReadToDo({toDoItems, tableHeaderNames, name, priority, s
                                         <DialogTitle>Update a Task</DialogTitle>
                                     </DialogHeader>
                                     <div className="mt-5">
-                                        <form onSubmit={()=>handleUpdate(todoItem.id)} method="post" className="grid gap-5">
+                                        <form onSubmit={(e)=>{e.preventDefault; handleUpdate(todoItem.id)}} method="post" className="grid gap-5">
                                             <Input placeholder={todoItem.name} type="string" value={name} onChange={(e)=>{setName(e.target.value)}}/>
                                             <Input placeholder={(todoItem.priority).toString()} type="number" value={priority} onChange={(e)=>{console.log(todoItem.priority);setPriority(parseInt(e.target.value))}}/>
                                             <div className="flex gap-5 pl-1 text-gray-700">
