@@ -10,13 +10,15 @@ interface ToDoContextType{
     setName: (name:string)=>void;
     setPriority: (priority:number)=>void;
     setDone: (done:boolean)=>void;
+    tableHeaderNames:string[];
+    updateTask:toDoItemsType|null;
+    setUpdateTask:(updateTask:toDoItemsType)=>void
+    loading:boolean;
+    setLoading: (loading:boolean)=>void;
     handleInsert: ()=>Promise<void>;
     handleDelete:(id:number)=>Promise<void>;
     handleUpdate:(id:number)=>Promise<void>;
     handleCheckBoxUpdate: (id:number, done:boolean)=>Promise<void>;
-    tableHeaderNames:string[];
-    updateTask:toDoItemsType|null;
-    setUpdateTask:(updateTask:toDoItemsType)=>void
 }
 
 export const ToDoContext= createContext<ToDoContextType | undefined>(undefined)
@@ -29,6 +31,7 @@ export const ToDoProvider= ({children}:{children:ReactNode})=>{
     const [priority, setPriority]=useState<number>(0)
     const [done, setDone]=useState<boolean>(false)
     const [updateTask, setUpdateTask]=useState<toDoItemsType | null>(null)
+    const [loading, setLoading] = useState<boolean>(false)
 
     const tableHeaderNames=[
         "Task Number",
@@ -76,14 +79,24 @@ export const ToDoProvider= ({children}:{children:ReactNode})=>{
 
     //update checkbox only
     const handleCheckBoxUpdate = async(id:number, done:boolean )=>{
-        await updateCheckboxAction(id, done)
-        setTriggerRefresh(prev=>!prev)
+        try{
+            setLoading(true)
+            await updateCheckboxAction(id, done)
+            setTriggerRefresh(prev=>!prev)
+        }
+        catch(error){
+            throw error;
+        }
+        finally{
+            setLoading(false)
+        }
     }
+    
     return(
         <ToDoContext.Provider value={{
             toDoItems, name, priority, done,setName, setPriority, setDone,
-            handleInsert, handleUpdate, handleDelete, 
-            handleCheckBoxUpdate, tableHeaderNames, updateTask, setUpdateTask
+            handleInsert, handleUpdate, handleDelete, handleCheckBoxUpdate, 
+            tableHeaderNames, updateTask, setUpdateTask, loading, setLoading
         }}>
             {children}
         </ToDoContext.Provider>
