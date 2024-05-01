@@ -14,6 +14,9 @@ interface ToDoContextType{
     handleDelete:(id:number)=>Promise<void>;
     handleUpdate:(id:number)=>Promise<void>;
     handleCheckBoxUpdate: (id:number, done:boolean)=>Promise<void>;
+    tableHeaderNames:string[];
+    updateTask:toDoItemsType|null;
+    setUpdateTask:(updateTask:toDoItemsType)=>void
 }
 
 export const ToDoContext= createContext<ToDoContextType | undefined>(undefined)
@@ -26,6 +29,14 @@ export const ToDoProvider= ({children}:{children:ReactNode})=>{
     const [priority, setPriority]=useState<number>(0)
     const [done, setDone]=useState<boolean>(false)
     const [updateTask, setUpdateTask]=useState<toDoItemsType | null>(null)
+
+    const tableHeaderNames=[
+        "Task Number",
+        "Task Name",
+        "Task Priority",
+        "Task Completion",
+        "Actions"
+    ]
 
     useEffect(() => {
         async function fetchData() {
@@ -70,9 +81,9 @@ export const ToDoProvider= ({children}:{children:ReactNode})=>{
     }
     return(
         <ToDoContext.Provider value={{
-            toDoItems, name, priority, done,
-            setName, setPriority, setDone,
-            handleInsert, handleUpdate, handleDelete, handleCheckBoxUpdate
+            toDoItems, name, priority, done,setName, setPriority, setDone,
+            handleInsert, handleUpdate, handleDelete, 
+            handleCheckBoxUpdate, tableHeaderNames, updateTask, setUpdateTask
         }}>
             {children}
         </ToDoContext.Provider>
@@ -82,4 +93,5 @@ export const ToDoProvider= ({children}:{children:ReactNode})=>{
 export const useToDo = () =>{
     const context = useContext(ToDoContext)
     if(!context) throw new Error('useToDo must be used within a todo provider')
+    return (context)
 }
