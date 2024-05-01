@@ -24,14 +24,16 @@ export async function readAction() {
 export async function  createAction({name, priority, done}:toDoItemsType){
     //get authenticated user
     const {data:{user}} = await supabase.auth.getUser();
-    const { error } = await supabase.from('todo').insert({ name: name, priority:priority, done:done, user_id:user?.id })
+    const { data:toDoItems, error } = await supabase.from('todo').insert({ name: name, priority:priority, done:done, user_id:user?.id })
     if(error){throw new Error("Did not create row")}
+    return toDoItems ? toDoItems[0]:null;
 }
 
 //update
 export async function updateAction({id, name, priority, done}:toDoItemsType){
-    const {error} = await supabase.from('todo').update({name:name, priority:priority, done:done}).eq('id',id)
+    const {data:toDoItems, error} = await supabase.from('todo').update({name:name, priority:priority, done:done}).eq('id',id)
     if(error){throw new Error("Did not update row")}
+    return toDoItems ? toDoItems[0]:null
 }
 
 //update checked box only
