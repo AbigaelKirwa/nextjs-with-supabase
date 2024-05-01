@@ -32,7 +32,7 @@ export default function updateToDo({todoItem}:updateToDoItemsType) {
                     <div className="mt-5">
                         <form onSubmit={()=>{handleUpdate(todoItem.id)}} method="post" className="grid gap-5">
                             <Input placeholder={todoItem.name} type="string" value={name} onChange={(e)=>{setName(e.target.value)}}/>
-                            <Input placeholder={(todoItem.priority).toString()} type="number" value={priority} onChange={(e)=>{console.log(todoItem.priority);setPriority(parseInt(e.target.value))}}/>
+                            <Input placeholder={(todoItem.priority).toString()} type="number" max={3} min={0} value={priority} onChange={(e)=>{console.log(todoItem.priority);setPriority(parseInt(e.target.value))}}/>
                             <div className="flex gap-5 pl-1 text-gray-700">
                                 <Label>Done</Label>
                                 {todoItem.done===true ? <input type="checkbox" defaultChecked onChange={()=>setDone(false)}/> : <input type="checkbox" onChange={()=>setDone(true)}/>}

@@ -22,7 +22,7 @@ export default function createToDo() {
                 <div className="mt-5">
                     <form onSubmit={handleInsert} method="post" className="grid gap-5">
                         <Input placeholder="name" type="string" value={name} onChange={(e)=>{setName(e.target.value)}}/>
-                        <Input placeholder="priority" type="number" value={priority} onChange={(e)=>{setPriority(parseInt(e.target.value))}}/>
+                        <Input placeholder="priority" type="number" max={3} min={0} value={priority} onChange={(e)=>{setPriority(parseInt(e.target.value))}}/>
                         <DialogFooter>
                             <Button className=" bg-[#201f1f] text-white px-8" type="submit">Save changes</Button>
                         </DialogFooter>
