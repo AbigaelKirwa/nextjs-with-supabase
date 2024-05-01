@@ -1,4 +1,3 @@
-import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table"
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogHeader, DialogFooter } from "@/components/ui/dialog"
@@ -18,9 +17,9 @@ interface ReactToDoProps{
     setUpdateTask: (task: toDoItemsType | null) => void;
     handleUpdate: (id: number) => void;
     handleDelete: (id: number) => void;
-    updateTask: (toDoItemsType|null)
+    handleCheckboxUpdate: (id:number, done:boolean) => void
 }
-export default function ReadToDo({toDoItems, tableHeaderNames, name, priority, setName, setPriority, setUpdateTask, handleUpdate, setDone, handleDelete, updateTask}:ReactToDoProps) {
+export default function ReadToDo({toDoItems, tableHeaderNames, name, priority, setName, setPriority, setUpdateTask, handleUpdate, setDone, handleDelete, handleCheckboxUpdate}:ReactToDoProps) {
   return (
     <Table className="mt-10">
         <TableHeader>
@@ -43,7 +42,10 @@ export default function ReadToDo({toDoItems, tableHeaderNames, name, priority, s
                     }
                 </TableCell>
                 <TableCell className="flex justify-center align-middle mt-2">
-                    {todoItem.done === true ? <Checkbox checked={todoItem.done} className="border-gray-600"/> : <Checkbox className="border-gray-600"/>}
+                    <input type="checkbox" checked={todoItem.done} className="border-gray-600" onChange={(e)=>{
+                        e.preventDefault()
+                        handleCheckboxUpdate(todoItem.id, e.target.checked)
+                    }}/> 
                 </TableCell>
                 <TableCell>
                         {/* update a task */}
@@ -51,22 +53,22 @@ export default function ReadToDo({toDoItems, tableHeaderNames, name, priority, s
                         <div>
                             <Dialog>
                                 <DialogTrigger asChild>
-                                <div>
-                                    <Button variant="secondary" className=" bg-blue-700 text-white" onClick={()=>{
-                                        setUpdateTask(todoItem)
-                                        setName(todoItem.name)
-                                        setDone(todoItem.done)
-                                        setPriority(todoItem.priority)
-                                        }}>
-                                            Edit</Button>
-                                </div>
+                                    <div>
+                                        <Button variant="secondary" className=" bg-blue-700 text-white" onClick={()=>{
+                                            setUpdateTask(todoItem)
+                                            setName(todoItem.name)
+                                            setDone(todoItem.done)
+                                            setPriority(todoItem.priority)
+                                            }}>
+                                                Edit</Button>
+                                    </div>
                                 </DialogTrigger>
                                 <DialogContent>
                                     <DialogHeader>
                                         <DialogTitle>Update a Task</DialogTitle>
                                     </DialogHeader>
                                     <div className="mt-5">
-                                        <form onSubmit={(e)=>{e.preventDefault; handleUpdate(todoItem.id)}} method="post" className="grid gap-5">
+                                        <form onSubmit={()=>{handleUpdate(todoItem.id)}} method="post" className="grid gap-5">
                                             <Input placeholder={todoItem.name} type="string" value={name} onChange={(e)=>{setName(e.target.value)}}/>
                                             <Input placeholder={(todoItem.priority).toString()} type="number" value={priority} onChange={(e)=>{console.log(todoItem.priority);setPriority(parseInt(e.target.value))}}/>
                                             <div className="flex gap-5 pl-1 text-gray-700">
